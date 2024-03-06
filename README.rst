@@ -1,9 +1,7 @@
-Template for the Read the Docs tutorial
+PACER-PHII ReadTheDocs page
 =======================================
 
-This GitHub template includes fictional Python library
-with some basic Sphinx docs.
+https://pacerdocs.readthedocs.io/en/latest/
 
-Read the tutorial here:
-
-https://docs.readthedocs.io/en/stable/tutorial/
+This is a ReadTheDocs template for the PACER-PHII project.
+It uses ReadTheDocs + sphinx documentation as tooling for publishing a documentation site.
