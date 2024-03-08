@@ -2,7 +2,7 @@
 Welcome to PACER's documentation!
 ###################################
 
-This document exists as a guide to help users understand the **P**ublic **H**ealth Automated **C**ase **E**lectronic **R**eporting tool, providing user and developer documentation.
+This document exists as a guide to help users understand the **P** ublic **H** ealth Automated **C** ase **E** lectronic **R** eporting tool, providing user and developer documentation.
 
 What is PACER?
 ==============
