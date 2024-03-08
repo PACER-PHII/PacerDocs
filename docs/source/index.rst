@@ -1,13 +1,22 @@
-Welcome to Lumache's documentation!
-===================================
+###################################
+Welcome to PACER's documentation!
+###################################
 
-**Lumache** (/lu'make/) is a Python library for cooks and food lovers
-that creates recipes mixing random ingredients.
-It pulls data from the `Open Food Facts database <https://world.openfoodfacts.org/>`_
-and offers a *simple* and *intuitive* API.
+This document exists as a guide to help users understand the **P**ublic **H**ealth Automated **C**ase **E**lectronic **R**eporting tool, providing user and developer documentation.
 
-Check out the :doc:`usage` section for further information, including
-how to :ref:`installation` the project.
+What is PACER?
+----------------------------------
+
+**PACER** is a client-server architechture for collecting supplemental health care data for health department and public health organizations.
+
+PACER describes both a client component, as well as a server component.
+PACER client consists of a local database, an ELR receiver, a manager api, and a ui frontend.
+The client program can be configured to connect to one or many seperate PACER Server
+PACER server is a hosted supplemental service for FHIR EHR servers, designed to retrieve supplimental information for relevant cases data
+
+
+For users, You can review the :doc:`client` section and :doc: `server` section for a detailed breakdown of services within each components
+For developers, direct installation instructions can be found in the :ref:`client installation` and :ref:`server implementation` page.
 
 .. note::
 
@@ -18,5 +27,5 @@ Contents
 
 .. toctree::
 
-   usage
-   api
+   client
+   server
