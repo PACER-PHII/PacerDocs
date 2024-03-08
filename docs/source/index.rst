@@ -5,7 +5,7 @@ Welcome to PACER's documentation!
 This document exists as a guide to help users understand the **P**ublic **H**ealth Automated **C**ase **E**lectronic **R**eporting tool, providing user and developer documentation.
 
 What is PACER?
-----------------------------------
+==============
 
 **PACER** is a client-server architechture for collecting supplemental health care data for health department and public health organizations.
 
@@ -23,7 +23,7 @@ For developers, direct installation instructions can be found in the :ref:`clien
    This project is under active development.
 
 Contents
---------
+========
 
 .. toctree::
 

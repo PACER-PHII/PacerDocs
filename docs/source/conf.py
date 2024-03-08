@@ -2,9 +2,9 @@
 
 # -- Project information
 
-project = 'Lumache'
-copyright = '2021, Graziella'
-author = 'Graziella'
+project = 'PACER'
+copyright = '2024, Georgia Tech Research Institute'
+author = 'Michael Riley'
 
 release = '0.1'
 version = '0.1.0'
