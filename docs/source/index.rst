@@ -11,7 +11,7 @@ What is PACER?
 
 PACER describes both a client component, as well as a server component.
 PACER client consists of a local database, an ELR receiver, a manager api, and a ui frontend.
-The client program can be configured to connect to one or many seperate PACER Server
+The client program can be configured to connect to one or many seperate PACER Server.
 PACER server is a hosted supplemental service for FHIR EHR servers, designed to retrieve supplimental information for relevant cases data
 
 
