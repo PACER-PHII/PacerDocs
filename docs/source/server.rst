@@ -14,7 +14,7 @@ PACER consists of: a JobManagementSystem for handling requests, a ResultsManager
 .. _server installation:
 
 Server Installation Instructions
-============
+================================
 PACER is a dockerized-project. It is preferable to build each component as a docker image and deploy with the Docker-Compose tool. For more information refer to
 
 * Docker-CE (Community Edition). Refer to https://docs.docker.com/install/ for installation instructions
@@ -29,8 +29,9 @@ To build and deploy the compose project follow these steps from the command line
 2. Build the database and application projects
 
 .. code-block:: console
-docker-compose -f docker-compose-db.yml build
-docker-compose -f docker-compose-apps.yml
+
+    docker-compose -f docker-compose-db.yml build
+    docker-compose -f docker-compose-apps.yml
 
 This will build deployable images for 6 different containers.
 
@@ -44,8 +45,9 @@ This will build deployable images for 6 different containers.
 3. Deploy dockerfiles in stages using compose
 
 .. code-block:: console
-docker-compose -f docker-compose-db.yml up -d #wait for the database service to complete it's initdb.script
-docker-compose -f docker-compose-apps.yml up -d
+
+    docker-compose -f docker-compose-db.yml up -d #wait for the database service to complete it's initdb.script
+    docker-compose -f docker-compose-apps.yml up -d
 
 This will turn on all application components and enable networking for the PACER application to recieve requests.
 
