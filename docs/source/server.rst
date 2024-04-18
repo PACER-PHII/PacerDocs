@@ -25,7 +25,7 @@ Pacer consists of 2 seperate docker-compose files: ``docker-compose-db.yml`` and
 * ``docker-compose-apps.yml`` consist of the application components that manage the PACER workflow.
 
 To build and deploy the compose project follow these steps from the command line.
-1. Review and confirm configration of the yaml files before installation. Refer to :ref:`server configuration` for more detailed instructions
+1. Review and confirm configration of the yaml files before installation. Refer to :ref:`configruation below <server configuration>` for more detailed instructions
 2. Build the database and application projects
 
 .. code-block:: console

@@ -16,7 +16,7 @@ PACER server is a hosted supplemental service for FHIR EHR servers, designed to 
 
 
 For users, You can review the :doc:`client` section and :doc: `server` section for a detailed breakdown of services within each components
-For developers, direct installation instructions can be found in the :ref:`client installation<Client Installation Instructions>` and :ref:`server installation<Server Installation Instructions>` page.
+For developers, direct installation instructions can be found in the :ref:`Client Installation Instructions<client installation>` and :ref:`Server Installation Instructions<server installation>` page.
 
 .. note::
 
