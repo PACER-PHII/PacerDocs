@@ -31,7 +31,7 @@ To build and deploy the compose project follow these steps from the command line
 .. code-block:: console
 
     docker-compose -f docker-compose-db.yml build
-    docker-compose -f docker-compose-apps.yml
+    docker-compose -f docker-compose-apps.yml build
 
 This will build deployable images for 6 different containers.
 
