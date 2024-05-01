@@ -80,21 +80,28 @@ External FHIR Server
 
 The external FHIR server is the system managed FHIR server. In addition to read capabilities in each resource, It is expected to support these specific search capabilities as well.
 * ``Patient``
+
     * ``?identifier`` Identifier search parameter is used to identify the patient.
 * ``Condition``
+
     * ``?patient`` Patient id related to the Condition
     * ``?category`` Code search with supported condition category types
     * ``?code:in`` Code search param used with :in modifier to provide large concept sets to be searched.
 * ``Encounter``
+
     * ``?patient`` Patient id related to the Encounter
 * ``Immmunization``
+
     * ``?patient`` Patient id related to the Immmunization
 * ``Medication``
+
     * ``?code:in`` Code search param used with :in modifier to provide large concept sets to be searched.
 * ``MedicationRequest``
+
     * ``?patient`` Patient id related to the MedicationRequest
     * ``code:in`` Code search param used with :in modifier to provide large concept sets to be searched.
 * ``Observation``
+
     * ``?patient`` Patient id related to the Observation
     * ``?category`` Code search with supported observation category types
     * ``code:in`` Code search param used with :in modifier to provide large concept sets to be searched.
