@@ -64,7 +64,7 @@ Before the server can be deployed, configuration within the ``docker-compose-app
 The yml file describes confirugation for each of the above components. Confirugation is passed as envrionment variables into each container.
 
 Configuration Requirements
-^^^^^^^^^^^^^^^^^^^^^^^^^^
+--------------------------
 
     *  ``results-manager/CQL_EXECUTION_DATA_SERVICE`` This is a defined baseurl to the hosted fhir server to be used. FHIR url paths should end in ``/fhir/`` as the baseurl.
     *  ``results-manager/CQL_EXECUTION_DATA_USER`` If the FHIR server uses  `Basic Authentication <https://www.twilio.com/docs/glossary/what-is-basic-authentication>`_ for authentication; provide a username here.
@@ -83,7 +83,7 @@ External FHIR Server
 The external FHIR server is the system managed FHIR server. In addition to read capabilities in each resource, It is expected to support these specific search capabilities
 
 FHIR Server Requirements
-^^^^^^^^^^^^^^^^^^^^^^^^
+------------------------
 
     + ``Patient``
         + ``?identifier`` Identifier search parameter is used to identify the patient.
