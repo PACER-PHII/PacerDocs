@@ -63,22 +63,27 @@ Configuration
 Before the server can be deployed, configuration within the ``docker-compose-apps.yml`` file must be reviewed
 The yml file describes confirugation for each of the above components. Confirugation is passed as envrionment variables into each container.
 
-The important configuration to review is
-*  ``results-manager/CQL_EXECUTION_DATA_SERVICE`` This is a defined baseurl to the hosted fhir server to be used. FHIR url paths should end in ``/fhir/`` as the baseurl.
-*  ``results-manager/CQL_EXECUTION_DATA_USER`` If the FHIR server uses  `Basic Authentication <https://www.twilio.com/docs/glossary/what-is-basic-authentication>`_ for authentication; provide a username here.
-*  ``results-manager/CQL_EXECUTION_DATA_PASS`` If the FHIR server uses  `Basic Authentication <https://www.twilio.com/docs/glossary/what-is-basic-authentication>`_ for authentication; provide a password here.
-*  ``results-manager/CQL_EXECUTION_EPIC_CLIENT_ID`` If the FHIR server uses  `Bearer Token Authentication <https://swagger.io/docs/specification/authentication/bearer-authentication/>`_  generate a service token for PACER and apply the plaintext token string here.
-*  ``results-manager/CQL_EXECUTION_TERMINOLOGY_SERVICE`` If a terminology service is provided via FHIR, provide the service url. FHIR url paths should end in ``/fhir/`` as the baseurl.
-*  ``results-manager/CQL_EXECUTION_TERMINOLOGY_USER`` If the terminology server uses  `Basic Authentication <https://www.twilio.com/docs/glossary/what-is-basic-authentication>`_ for authentication; provide a username here.
-*  ``results-manager/CQL_EXECUTION_TERMINOLOGY_PASS`` If the terminology service uses  `Basic Authentication <https://www.twilio.com/docs/glossary/what-is-basic-authentication>`_ for authentication; provide a password here.
-* ``results-manager/CQL_EXECUTION_CODEMAPPER_SYSTEMS_MAP`` If the FHIR server uses local system definitions for common terminology systems (LOINC, Snomed, RxNorm), provide a key:value pair for the general url to the local system url provided. An example is provided in the comments for creating this key:value pair.
+Configuration Requirements
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+    *  ``results-manager/CQL_EXECUTION_DATA_SERVICE`` This is a defined baseurl to the hosted fhir server to be used. FHIR url paths should end in ``/fhir/`` as the baseurl.
+    *  ``results-manager/CQL_EXECUTION_DATA_USER`` If the FHIR server uses  `Basic Authentication <https://www.twilio.com/docs/glossary/what-is-basic-authentication>`_ for authentication; provide a username here.
+    *  ``results-manager/CQL_EXECUTION_DATA_PASS`` If the FHIR server uses  `Basic Authentication <https://www.twilio.com/docs/glossary/what-is-basic-authentication>`_ for authentication; provide a password here.
+    *  ``results-manager/CQL_EXECUTION_EPIC_CLIENT_ID`` If the FHIR server uses  `Bearer Token Authentication <https://swagger.io/docs/specification/authentication/bearer-authentication/>`_  generate a service token for PACER and apply the plaintext token string here.
+    *  ``results-manager/CQL_EXECUTION_TERMINOLOGY_SERVICE`` If a terminology service is provided via FHIR, provide the service url. FHIR url paths should end in ``/fhir/`` as the baseurl.
+    *  ``results-manager/CQL_EXECUTION_TERMINOLOGY_USER`` If the terminology server uses  `Basic Authentication <https://www.twilio.com/docs/glossary/what-is-basic-authentication>`_ for authentication; provide a username here.
+    *  ``results-manager/CQL_EXECUTION_TERMINOLOGY_PASS`` If the terminology service uses  `Basic Authentication <https://www.twilio.com/docs/glossary/what-is-basic-authentication>`_ for authentication; provide a password here.
+    * ``results-manager/CQL_EXECUTION_CODEMAPPER_SYSTEMS_MAP`` If the FHIR server uses local system definitions for common terminology systems (LOINC, Snomed, RxNorm), provide a key:value pair for the general url to the local system url provided. An example is provided in the comments for creating this key:value pair.
 
 .. _server FHIR Server:
 
 External FHIR Server
 ====================
 
-The external FHIR server is the system managed FHIR server. In addition to read capabilities in each resource, It is expected to support these specific search capabilities as well.
+The external FHIR server is the system managed FHIR server. In addition to read capabilities in each resource, It is expected to support these specific search capabilities
+
+FHIR Server Requirements
+^^^^^^^^^^^^^^^^^^^^^^^^
 
     + ``Patient``
         + ``?identifier`` Identifier search parameter is used to identify the patient.
