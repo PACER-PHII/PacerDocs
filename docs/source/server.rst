@@ -46,11 +46,9 @@ This will build deployable images for 6 different containers.
 3. Deploy dockerfiles in stages using compose.
 
 .. note::
-
-Again before deploying, it is recommended to refer to :ref:`server configruation below <server configuration>` to ensure connection to the FHIR server is correct
+    Again before deploying, it is recommended to refer to :ref:`server configruation below <server configuration>` to ensure connection to the FHIR server is correct
 
 .. code-block:: console
-
     docker-compose -f docker-compose-db.yml up -d #wait for the database service to complete it's initdb.script
     docker-compose -f docker-compose-apps.yml up -d
 
