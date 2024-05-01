@@ -14,7 +14,7 @@ PACER consists of: a JobManagementSystem for handling requests, a ResultsManager
 .. _server installation:
 
 Server Installation And Deploy Instructions
-================================
+===========================================
 PACER is a dockerized-project. It is preferable to build each component as a docker image and deploy with the Docker-Compose tool. For more information refer to
 
 * Docker-CE (Community Edition). Refer to https://docs.docker.com/install/ for installation instructions
@@ -46,6 +46,7 @@ This will build deployable images for 6 different containers.
 3. Deploy dockerfiles in stages using compose.
 
 .. note::
+
 Again before deploying, it is recommended to refer to :ref:`server configruation below <server configuration>` to ensure connection to the FHIR server is correct
 
 .. code-block:: console
