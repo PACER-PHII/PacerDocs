@@ -290,6 +290,7 @@ PACER-client can be installed in the Linux environment in two ways. One is using
 
 **Docker Installation**
 For Docker installation, the following packages must be installed.
+
 * Docker Engine : (Unbuntu) https://docs.docker.com/engine/install/ubuntu/ (Redhat) 
 * Docker Compose : https://docs.docker.com/compose/compose-file/ 
 
@@ -298,6 +299,7 @@ Docker downloads base images from Docker server. Therefore, incoming HTTP traffi
 PACER-client Deployment using Docker
 ************************************
 Once the docker is installed, run the following command to install PACER-client in Docker container.
+
 1. Go to the folder where the PACER-client is cloned or downloaded.
 2. Open ``docker-compose.yml`` and check the envrionment varialbes. In most cases, the variables can be used as is. However, if you wish to change, please do for your environment. Only *ecr-postgresql* is set to restart when host restarted. If the other components need to be reatarted, please put *restart: always* in each component you want to enable the restart.
 3. Run the following command,
@@ -308,16 +310,23 @@ Once the docker is installed, run the following command to install PACER-client 
 
 ``sudo docker ps -a``
 
-If all components are successfully installed and deployed, the following components must be in the running state.
-* ecr-postgresql
-* elr-receiver
-* ecr-manager
-* pacer-index-api
+Output of the command should look like follows if all components are successfully deployed. STATUS should be all "Up".
+
+============ ============================ ====================== ============== ============= =================================================== ==============================
+CONTAINER ID IMAGE                        COMMAND                CREATED        STATUS        PORTS                                               NAMES
+============ ============================ ====================== ============== ============= =================================================== ==============================
+dfa79bbeda42 pacer-client-ecr-manager     "java -jar ecr-manag…" 22 seconds ago Up 20 seconds 0.0.0.0:8085->8080/tcp, :::8085->8080/tcp           pacer-client-ecr-manager-1
+e3d262a16911 pacer-client-elr-receiver    "java -jar elr_recei…" 22 seconds ago Up 21 seconds 8888/tcp, 0.0.0.0:8087->8887/tcp, :::8087->8887/tcp pacer-client-elr-receiver-1
+5262d37888bc pacer-client-pacer-index-api "java -jar /pacer-in…" 22 seconds ago Up 21 seconds 8080/tcp, 0.0.0.0:8086->8086/tcp, :::8086->8086/tcp pacer-client-pacer-index-api-1
+1b999305ec4a pacer-client-ecr-postgresql  "docker-entrypoint.s…" 23 seconds ago Up 21 seconds 0.0.0.0:5432->5432/tcp, :::5432->5432/tcp           pacer-client-ecr-postgresql-1
+============ ============================ ====================== ============== ============= =================================================== ==============================
+
 
 5. To uninstall all components, run the following command. Please note that this command will remove entire package and data.
 
 ``sudo docker-compose down``
 
+.. _client ECR Manager:
 
 ***********
 ECR Manager
@@ -333,6 +342,8 @@ PACER-server endpoint information is retrieved from :ref:`client index service`.
 to be successfully made to the PACER-server. Any response other than HTTP 200 (OK) or 201 (CREATED) will be considered as failed. 
 ECR successfully received from PACER-server will be merged into ECR repository. Any existing fields in the ECR repository will be 
 updated. The information from PACER-server precedes information from the initial (or existing) ECR.  
+
+.. _client ECR Manager API:
 
 =================
 API Documentation
@@ -593,6 +604,8 @@ Retrieving ECRs
     :query string diagnosisCode: Diagnosis (or Condition) code of the case patient
     :resheader Content-Type: application/json
     :statuscode 200: no error
+
+.. _client Add ECR:
 
 Adding an ECR
 *************
@@ -1389,8 +1402,21 @@ This API displays the version of ECR-MANAGER.
 ************
 ELR Reciever
 ************
-<ELR_Receiver Overview here>
+========
+Overview
+========
+ELR Receiver is a starting point for PACER-client workflow (see :ref:`client overview`) and expects the electronic lab reports (ELRs) 
+in HL7 v2 with a message type, ``ORU^R01`` 
 
+It supports `MLLP <https://rhapsody.health/resources/mlp-minimum-layer-protocol/>`_ for the v2 messaging protocol. 
+
+During the operation, ELR Receiver parses the incoming ELR and converts it to electronic case report (ECR). Currently, the parser 
+supports HL7v2.5.1 and HL7v2.3.1. The ECR converted the ELR message is submitted to the ECR-MANAGER API (see :ref:`client Add ECR`).
+This ECR is called, "initial ECR", in :ref:`client ECR Manager` and stored in the ECR database.
+
+ELR Receiver implements automatic failure recovery using a queue. ECR submission is queued and only removed from the queue when the 
+submission is successfully completed. If the ECR submission to :ref:`client ECR Manager` MANAGER fails, the failed submission will be 
+retrieved from the queue and resubmitted. This process repeats until the submission succeeds.
 
 .. _client index service:
 
@@ -1400,12 +1426,319 @@ PACER Index API
 ========
 Overview
 ========
-<PACER Index API Overview here>
+PACER Index Service provides the PACER-server endpoint information. ECR Manager uses PACER Index Service API to search for a 
+PACER-server endpoint and authorization method using organization and/or provider in the initial ECR.
+
+The PACER Index Service is managed by the health department (or organization where the PACER-client platform is deployed). 
+Index API itself does not require authorization. However, the management APIs require Basic authorization. The Basic 
+authorization is set using environment variables during deployment (see :ref:`client installation`). The API Documentation section 
+below explains how to manage the indexing and search the PACER-server endpoint.
 
 =================
 API Documentation
 =================
-<PACER Index API API Documentation here>
+
+PACER-Index-API service has two operations. One is management operation, and the other one is search operation. 
+
+Manament Operation
+******************
+.. http:get:: /pacer-index-api/1.0.0/manage/{id}
+
+    This API retrieves entire index entries. 
+
+    **Example PACER-INDEX-API Entry Request**
+
+    .. sourcecode:: http
+        
+        GET /pacer-index-api/1.0.0/manage HTTP/1.1
+        Host: example.org:8086
+        Authorization: Basic encoDedcReDentiAl==
+        Accept: */*
+
+    **Example PACER-INDEX-API Entry Response**
+
+    .. sourcecode:: http
+
+        HTTP/1.1 200 
+        X-Content-Type-Options: nosniff
+        X-XSS-Protection: 1; mode=block
+        Cache-Control: no-cache, no-store, max-age=0, must-revalidate
+        Pragma: no-cache
+        Expires: 0
+        X-Frame-Options: DENY
+        Content-Type: application/json
+        Transfer-Encoding: chunked
+        Date: Wed, 08 May 2024 03:35:51 GMT
+
+        {
+            "count": 2,
+            "created": "2024-05-07T23:35:51.128-04:00",
+            "list": [
+                {
+                    "id": 1,
+                    "providerName": "John Duke",
+                    "identifier": "ORDPROVIDER|P49430",
+                    "pacerSource": {
+                        "name": "PACER test",
+                        "serverUrl": "https://pacer-server.org/JobManagementSystem/List",
+                        "security": {
+                            "type": "basic",
+                            "username": "username",
+                            "password": "password"
+                        },
+                        "version": "1.0.0",
+                        "type": "ECR"
+                    }
+                },
+                {
+                    "id": 2,
+                    "providerName": "",
+                    "identifier": "appfac|PACERv1|GTRI",
+                    "pacerSource": {
+                        "name": "PACER test",
+                        "serverUrl": "https://pacer-server.org/JobManagementSystem/List",
+                        "security": {
+                            "type": "basic",
+                            "username": "username",
+                            "password": "password"
+                        },
+                        "version": "1.0.0",
+                        "type": "ECR"
+                    }
+                }
+            ]
+        }
+
+    :query int id: PACER-server Index ID. Optional. If {id} is provided, the response will be single entry.
+    :reqheader Authorization: Basic Authorization
+    :statuscode 200: Ok
+    :statuscode 401: Authentication information is missing or invalid
+    :statuscode 403: Forbidden
+    :statuscode 404: Not Found
+
+.. http:post:: /pacer-index-api/1.0.0/manage
+
+    This API creates a new entry with the entry provided in the payload. 
+
+    **Example PACER-INDEX-API Entry Create Request**
+
+    .. sourcecode:: http
+        
+        POST /pacer-index-api/1.0.0/manage HTTP/1.1
+        Host: yellowisland01.icl.gtri.org:8086
+        User-Agent: insomnia/9.1.0
+        Content-Type: application/json
+        Authorization: Basic dXNlcjpwYXNzd29yZA==
+        Accept: */*
+        Content-Length: 318
+
+        {
+            "providerName": "Test PROVIDER",
+            "identifier": "TEST_PROVIDER|1",
+            "pacerSource": {
+                "name": "TEST_PACER_1",
+                "serverUrl": "https://pacer-server.org/JobManagementSystem/List",
+                "security": {
+                    "type": "basic",
+                    "username": "username",
+                    "password": "password"
+                },
+                "version": "1.4.3",
+                "type": "ECR"
+            }
+        }
+
+    **Example PACER-INDEX-API Entry Create Response**
+
+    .. sourcecode:: http
+
+        HTTP/1.1 201 
+        Location: http://example.org:8086/pacer-index-api/1.0.0/manage/5
+        X-Content-Type-Options: nosniff
+        X-XSS-Protection: 1; mode=block
+        Cache-Control: no-cache, no-store, max-age=0, must-revalidate
+        Pragma: no-cache
+        Expires: 0
+        X-Frame-Options: DENY
+        Content-Length: 0
+        Date: Wed, 08 May 2024 05:26:49 GMT
+
+    :reqheader Authorization: Basic Authorization
+    :statuscode 201: Created
+    :statuscode 204: Content Not Found
+    :statuscode 400: Invalid input, object invalid
+    :statuscode 401: Authentication information is missing or invalid
+    :statuscode 403: Forbidden
+    :statuscode 404: Not Found
+    :statuscode 409: Entry already exist
+
+.. http:put:: /pacer-index-api/1.0.0/manage/{id}
+
+    This API updates the existing entry with the new entry provided in the payload. 
+
+    **Example PACER-INDEX-API Entry Update Request**
+
+    .. sourcecode:: http
+        
+        PUT /pacer-index-api/1.0.0/manage/1 HTTP/1.1
+        Host: example.org:8086
+        Content-Type: application/json
+        Authorization: Basic dXNlcjpwYXNzd29yZA==
+        Accept: */*
+        Content-Length: 375
+
+        {
+            "id": 1,
+            "providerName": "LOCAL PROVIDER",
+            "identifier": "LOCAL_PROVIDER|1",
+            "pacerSource": {
+                "name": "LOCAL_PACER_1",
+                "serverUrl": "https://pacer-server.org/JobManagementSystem/List",
+                "security": {
+                "type": "basic",
+                "username": "username",
+                "password": "password"
+                },
+                "version": "1.4.3",
+                "type": "ECR"
+            }
+        }
+
+    **Example PACER-INDEX-API Entry Update Response**
+
+    .. sourcecode:: http
+
+        HTTP/1.1 200 
+        X-Content-Type-Options: nosniff
+        X-XSS-Protection: 1; mode=block
+        Cache-Control: no-cache, no-store, max-age=0, must-revalidate
+        Pragma: no-cache
+        Expires: 0
+        X-Frame-Options: DENY
+        Content-Length: 0
+        Date: Wed, 08 May 2024 05:14:52 GMT
+
+    :query int id: PACER-INDEX-API ID. Required
+    :reqheader Authorization: Basic Authorization
+    :statuscode 200: Ok
+    :statuscode 204: Content Not Found
+    :statuscode 400: Invalid input, object invalid
+    :statuscode 401: Authentication information is missing or invalid
+    :statuscode 403: Forbidden
+    :statuscode 404: Not Found
+
+.. http:delete:: /pacer-index-api/1.0.0/manage/{id}
+
+    This API deletes the entry with id = {id}
+
+    **Example PACER-INDEX-API Entry Delete Request**
+
+    .. sourcecode:: http
+        
+        DELETE /pacer-index-api/1.0.0/manage/5 HTTP/1.1
+        Host: example.org:8086
+        Content-Type: application/json
+        Authorization: Basic dXNlcjpwYXNzd29yZA==
+        Accept: */*
+        Content-Length: 0
+
+
+    **Example PACER-INDEX-API Entry Delete Response**
+
+    .. sourcecode:: http
+
+        HTTP/1.1 200 
+        X-Content-Type-Options: nosniff
+        X-XSS-Protection: 1; mode=block
+        Cache-Control: no-cache, no-store, max-age=0, must-revalidate
+        Pragma: no-cache
+        Expires: 0
+        X-Frame-Options: DENY
+        Content-Length: 0
+        Date: Wed, 08 May 2024 05:35:41 GMT
+
+    :reqheader Authorization: Basic Authorization
+    :statuscode 200: Ok
+    :statuscode 204: Content Not Found
+    :statuscode 400: Invalid input, object invalid
+    :statuscode 401: Authentication information is missing or invalid
+    :statuscode 403: Forbidden
+
+Search Operation
+******************
+.. http:get:: /pacer-index-api/1.0.0/search
+
+    This API search the PACER-server endpoint with two search parameters, ``provider-name`` or ``organization-id``.
+    ``provider-name`` is compared with ``providerName`` in the entry. ``organization-id`` is compared with
+    ``identifier`` in the entry. 
+
+    ``organization-id`` and ``provider-name`` are retrieved from two different places in HL7v2. First, ``organization-id`` 
+    is formated as ``type|id``. if `type`` is set to “appfac”, then it means sending application and sending facility in 
+    MSH segment of HL7 v2 message. Sending application is in MSH-3. And, sending facility is in MSH-4. 
+    `id`` is taking value from MSH-3.1 and MSH-4.1. These are namespace ids in the segment. 
+    
+    ``provider-name`` is from OBR and ORC segments where ordering provider information is specified. Each segment has a 
+    list of ordering providers (OBR-16 or ORC-12). If the ordering provider in OBR has an id number populated, then ``type|id`` 
+    will be overwritten with this value. In this case, the type is set to “ORDPROVIDER”. OBR is first checked for the provider 
+    id number. If this is empty, then ORC is used. If both are empty, the type|id value remains as MSH's sending application 
+    and sending facility. So, based on the type, we can locate where the identifier of the organization is obtained. 
+    
+    The purpose of using MSH is to support the HIE network, where the ordering entities are defined by application/facility 
+    not ordering provider. When registering PACER-server at the PACER Index API Service, the identifier must be set correctly. 
+    Otherwise, ECR manager won't be able to retrieve a correct end point for the PACER server. If unsure whether MSH or OBR/ORC 
+    will be used, two entries can be registered with the same PACER server information so that it can be matched.    
+
+    **Example PACER-INDEX-API Search Request**
+
+    .. sourcecode:: http
+        
+        GET /pacer-index-api/1.0.0/search?organization-id=LOCAL_PROVIDER%7C1 HTTP/1.1
+        Host: example.org:8086
+        Accept: */*
+
+    **Example PACER-INDEX-API Search Response**
+
+    .. sourcecode:: http
+
+        HTTP/1.1 200 
+        X-Content-Type-Options: nosniff
+        X-XSS-Protection: 1; mode=block
+        Cache-Control: no-cache, no-store, max-age=0, must-revalidate
+        Pragma: no-cache
+        Expires: 0
+        X-Frame-Options: DENY
+        Content-Type: application/json
+        Transfer-Encoding: chunked
+        Date: Wed, 08 May 2024 06:00:02 GMT
+
+        {
+            "count": 1,
+            "created": "2024-05-08T02:00:02.655-04:00",
+            "list": [
+                {
+                    "id": 1,
+                    "providerName": "LOCAL PROVIDER",
+                    "identifier": "LOCAL_PROVIDER|1",
+                    "pacerSource": {
+                        "name": "LOCAL_PACER_1",
+                        "serverUrl": "https://pacer-server.org/JobManagementSystem/List",
+                        "security": {
+                            "type": "basic",
+                            "username": "username",
+                            "password": "password"
+                        },
+                        "version": "1.4.3",
+                        "type": "ECR"
+                    }
+                }
+            ]
+        }
+
+    :query string provider-name: Provider Name
+    :query string organization-id: Organization or facility Type:ID
+    :statuscode 200: Ok
+    :statuscode 400: Invalid input, object invalid
+    :statuscode 403: Forbidden
 
 .. _client ui:
 
