@@ -21,9 +21,9 @@ overall architecture of PACER.
 
 .. _client installation:
 
-==============================
+******************************
 Installation and Configuration
-==============================
+******************************
 PACKER client supports both Linux and Windows platform. Mac is considered as a Linux environment. Please download appropriate
 package from GitHub repositories. Repository URLs as follows.
 
@@ -37,8 +37,9 @@ Link to the released version is available on the right middle side of the reposi
 Please note that this is a pilot project. The released version may have unseen issues. Contact the developers if any
 issues occur. 
 
+========
 Database
-********
+========
 Database must be created and properly configured before you proceed to deploy PACER-client service components. Any 
 relational database can be used. PACER-client is tested with MS SQL and PostgreSQL server. 
 
@@ -58,15 +59,15 @@ under the "ecr" schema.
 For MS SQL server, in order to use Windows Authentication for MS SQL, make sure "ecr" database is owned by the account that will 
 run PACER-client or the account has a db writer/reader permission. Please note that the schema name also needs to be "ecr"
 
-
+===================
 Windows Server 2019
-*******************
+===================
 PACER-client uses a wrapper to run the Java application as a window service. Windows Service Wrapper (WinSW) is used for the 
 wrapper.exe. All PACER-client components in this repository already have this wrapper application. Thus, nothing needs to be 
 done for this wrapper. If you want to learn about the WinSW, please refer to https://github.com/winsw/winsw
 
 Prerequisites
-=============
+*************
 **OpenJDK installation**
 
 Java runtime environment is required to run this service. Either JRE or JDK needs to be installed.
@@ -104,7 +105,7 @@ trust-store in Java.
 * If you are asked for a password but haven't set it before, then the default password is "changeit". In production environment, this password needs to be updated. The certificate will be added to the trust-store.
 
 Deployment
-==========
+**********
 There are three folders in the PACER-client-win repository. It is recommeded to create a separate folder to copy the following 
 three folders. In this way, when updates are made, the original folder can be kept as a backup folder.
 
@@ -127,7 +128,7 @@ Detail application installation instructions for each application are provided b
 .. _client win-pacer-index-api:
 
 PACER-INDEX-API
-~~~~~~~~~~~~~~~
+===============
 
 At Powershell (in Admin mode), go to ``pacer-index-api/`` folder. And open ``pacer-index-api.xml`` file. Then, check the environment 
 variables and change them as needed. JAVA_HOME should work as is if the same version of JDK in this document is used. If you are 
@@ -201,7 +202,7 @@ ECR manager uses the index API to get the PACER-server endpoint to send a query 
 for the ELR messages, they all need to be added to this API service with their PACER-server endpoint.
 
 ECR-MANAGER
-~~~~~~~~~~~
+===========
 In ``ecr-manager/`` folder. Open ``ecr-manager.xml`` file. Example xml file is shown below.
 
 .. code-block:: XML
@@ -248,7 +249,7 @@ to access (read and write) the MS SQL server.
     If you run it from the browser, it will save the file in the download folder with name = csv_[datetime].csv.
 
 ELR-RECEIVER
-~~~~~~~~~~~~
+============
 In ``elr-receiver/`` folder, update ``elr-receiver.xml`` file. ``ECR_URL`` in the ``elr-receiver.xml`` is an environment variable 
 that may need to be updated. However, if default values are used for ECR-MANAGER installation, and ECR-MANAGER and ELR-RECEIVER are 
 running in the same machine, then the default configuraion may be used without modifications.
@@ -263,7 +264,7 @@ and choose 'this account' option. Then, add username and password. Please note t
 the local hard disk. ELR-RECEIVER needs to have read and write permission to the hard disk so that a queue file can be created and managed.
 
 PACER-UI
-~~~~~~~~
+========
 This is a user dashboard that shows the case reports in PACER. The dashboard is written in Angular, and the source codes are available in 
 https://github.com/PACER-PHII/pacer-ui.git if you are interested in and willing to contribute in the development.
 
@@ -280,11 +281,11 @@ Use the web browser and go to http://localhost/pacer-ui if you are running from 
 If you want to have authentication on the UI, please follow the instruction at https://learn.microsoft.com/en-us/iis/configuration/system.webserver/security/authentication/windowsauthentication/
 The IIS will ask the Windows Serverx user credential. Please note that the browser saves the credentials. So, if you are using the shared computer, please make sure you clean the web data.
 
-
+============
 Linux Server
-************
+============
 Prerequisites
-=============
+*************
 PACER-client can be installed in the Linux environment in two ways. One is using Docker, and the other is using Java and runnit them at the command line. 
 
 **Docker Installation**
@@ -294,8 +295,8 @@ For Docker installation, the following packages must be installed.
 
 Docker downloads base images from Docker server. Therefore, incoming HTTP traffic from outside must be allowed.
 
-PACER-client Deployment for Docker
-==================================
+PACER-client Deployment using Docker
+************************************
 Once the docker is installed, run the following command to install PACER-client in Docker container.
 1. Go to the folder where the PACER-client is cloned or downloaded.
 2. Open ``docker-compose.yml`` and check the envrionment varialbes. In most cases, the variables can be used as is. However, if you wish to change, please do for your environment. Only *ecr-postgresql* is set to restart when host restarted. If the other components need to be reatarted, please put *restart: always* in each component you want to enable the restart.
@@ -313,57 +314,1110 @@ If all components are successfully installed and deployed, the following compone
 * ecr-manager
 * pacer-index-api
 
-PACER-client Deployment for non-Docker
-======================================
+5. To uninstall all components, run the following command. Please note that this command will remove entire package and data.
+
+``sudo docker-compose down``
 
 
-
-
-
-
-
-
-===========
+***********
 ECR Manager
-===========
+***********
+========
 Overview
-********
+========
+ECR Manager is the core component of PACER-client. PACER-client accepts an initial ECR from ELR Receiver and stores the ECR 
+in the ECR repository. Then, ECR Manager creates a request in the job queue. ECR Manager periodically pulls the request from 
+the job queue and processes it to send out to PACER-server.
 
+PACER-server endpoint information is retrieved from :ref:`client index service`. ECR Manager is responsible for the request 
+to be successfully made to the PACER-server. Any response other than HTTP 200 (OK) or 201 (CREATED) will be considered as failed. 
+ECR successfully received from PACER-server will be merged into ECR repository. Any existing fields in the ECR repository will be 
+updated. The information from PACER-server precedes information from the initial (or existing) ECR.  
 
+=================
 API Documentation
-*****************
+=================
+APIs for ECR Manager are as follows. These APIs should only be used within PACER-client components. No external components 
+(from outside network) should be calling the APIs
 
+Retrieving ECRs
+***************
+
+.. http:get:: /ecr-manager/ECR
+
+    This API is to get current ECRs. If no query parameters are provided, then the ``page`` will default to 0.
+    First up to 50 ECRs will be returned in the response payload. Subsequent calls are required to get all ECRs.
+    The last page has less than 50 entries.
+
+    **Example ECR Request**
+
+    .. sourcecode:: http
+
+        GET /ecr-manager/ECR HTTP/1.1
+        Host: example.org:8085
+        Accept: */*
+
+    **Example Response**
+
+    .. sourcecode:: http
+
+        HTTP/1.1 200 
+        Vary: Origin
+        Vary: Access-Control-Request-Method
+        Vary: Access-Control-Request-Headers
+        Content-Type: application/json
+        Transfer-Encoding: chunked
+        Date: Tue, 07 May 2024 14:47:26 GMT
+
+        [
+            {
+                "Id": "4602",
+                "Status": "A",
+                "StatusLog": null,
+                "Provider": [
+                    {
+                        "ID": {
+                            "value": " GT|Reliable",
+                            "type": "appfac"
+                        },
+                        "Name": "",
+                        "Phone": "",
+                        "Fax": "",
+                        "Email": "",
+                        "Facility": "",
+                        "Address": "",
+                        "Country": ""
+                    },
+                    {
+                        "ID": {
+                            "value": "P49430",
+                            "type": "ORDPROVIDER"
+                        },
+                        "Name": "D ATKINSON",
+                        "Phone": "",
+                        "Fax": "",
+                        "Email": "",
+                        "Facility": "",
+                        "Address": "",
+                        "Country": ""
+                    },
+                    {
+                        "ID": {
+                            "value": "P49430",
+                            "type": "ORDPROVIDER"
+                        },
+                        "Name": "John Duke",
+                        "Phone": "",
+                        "Fax": "",
+                        "Email": "",
+                        "Facility": "",
+                        "Address": "",
+                        "Country": ""
+                    }
+                ],
+                "Facility": {
+                    "ID": null,
+                    "Name": "",
+                    "Phone": "",
+                    "Address": "",
+                    "Fax": "",
+                    "Hospital_Unit": ""
+                },
+                "Patient": {
+                    "ID": [
+                        {
+                            "value": "2000",
+                            "type": "urn:local:gtritest"
+                        },
+                        {
+                            "value": "500000000",
+                            "type": "SS"
+                        },
+                        {
+                            "value": "82713",
+                            "type": "urn:local:gtritest"
+                        }
+                    ],
+                    "Name": {
+                        "given": "SOPHIE82713",
+                        "family": "STONE"
+                    },
+                    "Parents_Guardians": [],
+                    "Street_Address": "2222 Home Street, Ann Arbor MI 99999",
+                    "Birth_Date": "19750602",
+                    "Sex": "M",
+                    "PatientClass": "",
+                    "Race": {
+                        "Code": "",
+                        "System": "",
+                        "Display": ""
+                    },
+                    "Ethnicity": {
+                        "Code": "",
+                        "System": "",
+                        "Display": ""
+                    },
+                    "Preferred_Language": {
+                        "Code": "",
+                        "System": "",
+                        "Display": ""
+                    },
+                    "Occupation": "",
+                    "Pregnant": false,
+                    "Travel_History": [],
+                    "Insurance_Type": {
+                        "Code": "",
+                        "System": "",
+                        "Display": ""
+                    },
+                    "Immunization_History": [],
+                    "Visit_DateTime": "",
+                    "Admission_DateTime": "",
+                    "Date_Of_Onset": "",
+                    "Symptoms": [],
+                    "Lab_Order_Code": [
+                        {
+                            "Code": "164200",
+                            "System": "L",
+                            "Display": "C. trachomatis - PCA",
+                            "Date": "Fri Apr 29 17:01:00 EDT 2005",
+                            "Laboratory_Results": [
+                                {
+                                    "Code": "164200",
+                                    "System": "L",
+                                    "Display": "C. trachomatis - PCA",
+                                    "Date": "Tue May 03 15:32:00 EDT 2005",
+                                    "Value": "Positive",
+                                    "Unit": {
+                                        "Code": "",
+                                        "System": "",
+                                        "Display": ""
+                                    }
+                                }
+                            ],
+                            "Facility": {
+                                "ID": null,
+                                "Name": "",
+                                "Phone": "",
+                                "Address": "",
+                                "Fax": "",
+                                "Hospital_Unit": ""
+                            },
+                            "Provider": {
+                                "ID": {
+                                    "value": "P49430",
+                                    "type": "ORDPROVIDER"
+                                },
+                                "Name": "D ATKINSON",
+                                "Phone": "",
+                                "Fax": "",
+                                "Email": "",
+                                "Facility": "",
+                                "Address": "",
+                                "Country": ""
+                            }
+                        },
+                        {
+                            "Code": "164205",
+                            "System": "L",
+                            "Display": "N gonorrhoeae Competition Rflx",
+                            "Date": "Fri Apr 29 17:01:00 EDT 2005",
+                            "Laboratory_Results": [
+                                {
+                                    "Code": "164205",
+                                    "System": "L",
+                                    "Display": "N gonorrhoeae Competition Rflx",
+                                    "Date": "Fri Apr 29 17:01:00 EDT 2005",
+                                    "Value": "Negative",
+                                    "Unit": {
+                                        "Code": "",
+                                        "System": "",
+                                        "Display": ""
+                                    }
+                                },
+                                {
+                                    "Code": "164212",
+                                    "System": "L",
+                                    "Display": "N gonorrhoeae DNA Probe w/Rflx",
+                                    "Date": "Fri Apr 29 17:01:00 EDT 2005",
+                                    "Value": "See Reflex",
+                                    "Unit": {
+                                        "Code": "",
+                                        "System": "",
+                                        "Display": ""
+                                    }
+                                }
+                            ],
+                            "Facility": {
+                                "ID": null,
+                                "Name": "",
+                                "Phone": "",
+                                "Address": "",
+                                "Fax": "",
+                                "Hospital_Unit": ""
+                            },
+                            "Provider": {
+                                "ID": {
+                                    "value": "P49430",
+                                    "type": "ORDPROVIDER"
+                                },
+                                "Name": "John Duke",
+                                "Phone": "",
+                                "Fax": "",
+                                "Email": "",
+                                "Facility": "",
+                                "Address": "",
+                                "Country": ""
+                            }
+                        }
+                    ],
+                    "Placer_Order_Code": "",
+                    "Diagnosis": [],
+                    "Medication Provided": [],
+                    "Death_Date": "",
+                    "Date_Discharged": "",
+                    "Laboratory_Results": [],
+                    "Trigger_Code": [],
+                    "Lab_Tests_Performed": []
+                },
+                "Sending Application": "",
+                "Notes": []
+            }
+        ]
+
+    :query int page: page number (default = 0) of ECRs. Each page contains upto 50 ECRs.
+    :query int id: ECR record id
+    :query string lastName: Last (or Family) name of the case patient
+    :query string firstName: First (or Given) name of the case patient
+    :query string zipCode: Zip code in address of the case patient
+    :query string diagnosisCode: Diagnosis (or Condition) code of the case patient
+    :resheader Content-Type: application/json
+    :statuscode 200: no error
+
+Adding an ECR
+*************
+
+.. http:post:: /ecr-manager/ECR
+
+    This API is to add an ECR. ECR must be included in the request body as a JSON format.
+
+    **Example ECR Request**
+
+    .. sourcecode:: http
+        
+        POST /ecr-manager/ECR HTTP/1.1
+        Host: example.org:8085
+        Content-Type: application/json
+        Accept: */*
+        Content-Length: 3941
+
+        {
+            "Provider": [
+                {
+                    "ID": {
+                        "value": " GT|Reliable",
+                        "type": "appfac"
+                    },
+                    "Name": "",
+                    "Phone": "",
+                    "Fax": "",
+                    "Email": "",
+                    "Facility": "",
+                    "Address": "",
+                    "Country": ""
+                },
+                {
+                    "ID": {
+                        "value": "P49430",
+                        "type": "ORDPROVIDER"
+                    },
+                    "Name": "D ATKINSON",
+                    "Phone": "",
+                    "Fax": "",
+                    "Email": "",
+                    "Facility": "",
+                    "Address": "",
+                    "Country": ""
+                },
+                {
+                    "ID": {
+                        "value": "P49430",
+                        "type": "ORDPROVIDER"
+                    },
+                    "Name": "John Duke",
+                    "Phone": "",
+                    "Fax": "",
+                    "Email": "",
+                    "Facility": "",
+                    "Address": "",
+                    "Country": ""
+                }
+            ],
+            "Facility": {
+                "ID": null,
+                "Name": "",
+                "Phone": "",
+                "Address": "",
+                "Fax": "",
+                "Hospital_Unit": ""
+            },
+            "Patient": {
+                "ID": [
+                    {
+                        "value": "1234000",
+                        "type": "urn:local:gtritest"
+                    },
+                    {
+                        "value": "888770000",
+                        "type": "SS"
+                    }
+                ],
+                "Name": {
+                    "given": "Example",
+                    "family": "Patient"
+                },
+                "Parents_Guardians": [],
+                "Street_Address": "1234 Olympic Street, Atlanta Ga 99999",
+                "Birth_Date": "19700712",
+                "Sex": "M",
+                "PatientClass": "",
+                "Race": {
+                    "Code": "",
+                    "System": "",
+                    "Display": ""
+                },
+                "Ethnicity": {
+                    "Code": "",
+                    "System": "",
+                    "Display": ""
+                },
+                "Preferred_Language": {
+                    "Code": "",
+                    "System": "",
+                    "Display": ""
+                },
+                "Occupation": "",
+                "Pregnant": false,
+                "Travel_History": [],
+                "Insurance_Type": {
+                    "Code": "",
+                    "System": "",
+                    "Display": ""
+                },
+                "Immunization_History": [],
+                "Visit_DateTime": "",
+                "Admission_DateTime": "",
+                "Date_Of_Onset": "",
+                "Symptoms": [],
+                "Lab_Order_Code": [
+                    {
+                        "Code": "164200",
+                        "System": "L",
+                        "Display": "C. trachomatis - PCA",
+                        "Date": "Fri Apr 29 17:01:00 EDT 2005",
+                        "Laboratory_Results": [
+                            {
+                                "Code": "164200",
+                                "System": "L",
+                                "Display": "C. trachomatis - PCA",
+                                "Date": "Tue May 03 15:32:00 EDT 2005",
+                                "Value": "Positive",
+                                "Unit": {
+                                    "Code": "",
+                                    "System": "",
+                                    "Display": ""
+                                }
+                            }
+                        ],
+                        "Facility": {
+                            "ID": null,
+                            "Name": "",
+                            "Phone": "",
+                            "Address": "",
+                            "Fax": "",
+                            "Hospital_Unit": ""
+                        },
+                        "Provider": {
+                            "ID": {
+                                "value": "P49430",
+                                "type": "ORDPROVIDER"
+                            },
+                            "Name": "D ATKINSON",
+                            "Phone": "",
+                            "Fax": "",
+                            "Email": "",
+                            "Facility": "",
+                            "Address": "",
+                            "Country": ""
+                        }
+                    },
+                    {
+                        "Code": "164205",
+                        "System": "L",
+                        "Display": "N gonorrhoeae Competition Rflx",
+                        "Date": "Fri Apr 29 17:01:00 EDT 2005",
+                        "Laboratory_Results": [
+                            {
+                                "Code": "164205",
+                                "System": "L",
+                                "Display": "N gonorrhoeae Competition Rflx",
+                                "Date": "Fri Apr 29 17:01:00 EDT 2005",
+                                "Value": "Negative",
+                                "Unit": {
+                                    "Code": "",
+                                    "System": "",
+                                    "Display": ""
+                                }
+                            },
+                            {
+                                "Code": "164212",
+                                "System": "L",
+                                "Display": "N gonorrhoeae DNA Probe w/Rflx",
+                                "Date": "Fri Apr 29 17:01:00 EDT 2005",
+                                "Value": "See Reflex",
+                                "Unit": {
+                                    "Code": "",
+                                    "System": "",
+                                    "Display": ""
+                                }
+                            }
+                        ],
+                        "Facility": {
+                            "ID": null,
+                            "Name": "",
+                            "Phone": "",
+                            "Address": "",
+                            "Fax": "",
+                            "Hospital_Unit": ""
+                        },
+                        "Provider": {
+                            "ID": {
+                                "value": "P49430",
+                                "type": "ORDPROVIDER"
+                            },
+                            "Name": "John Duke",
+                            "Phone": "",
+                            "Fax": "",
+                            "Email": "",
+                            "Facility": "",
+                            "Address": "",
+                            "Country": ""
+                        }
+                    }
+                ],
+                "Placer_Order_Code": "",
+                "Diagnosis": [],
+                "Medication Provided": [],
+                "Death_Date": "",
+                "Date_Discharged": "",
+                "Laboratory_Results": [],
+                "Trigger_Code": [],
+                "Lab_Tests_Performed": []
+            },
+            "Sending Application": "",
+            "Notes": []
+	    }
+
+    **Example Response**
+
+    .. sourcecode:: http
+
+       HTTP/1.1 201
+       Vary: Origin
+       Vary: Access-Control-Request-Method
+       Vary: Access-Control-Request-Headers
+       Content-Type: application/json
+       Transfer-Encoding: chunked
+       Date: Tue, 07 May 2024 15:52:49 GMT
+
+       {
+            "Id": "5104",
+            "Status": "R",
+            "StatusLog": null,
+            "Provider": [
+                {
+                    "ID": {
+                        "value": " GT|Reliable",
+                        "type": "appfac"
+                    },
+                    "Name": "",
+                    "Phone": "",
+                    "Fax": "",
+                    "Email": "",
+                    "Facility": "",
+                    "Address": "",
+                    "Country": ""
+                },
+                {
+                    "ID": {
+                        "value": "P49430",
+                        "type": "ORDPROVIDER"
+                    },
+                    "Name": "D ATKINSON",
+                    "Phone": "",
+                    "Fax": "",
+                    "Email": "",
+                    "Facility": "",
+                    "Address": "",
+                    "Country": ""
+                },
+                {
+                    "ID": {
+                        "value": "P49430",
+                        "type": "ORDPROVIDER"
+                    },
+                    "Name": "John Duke",
+                    "Phone": "",
+                    "Fax": "",
+                    "Email": "",
+                    "Facility": "",
+                    "Address": "",
+                    "Country": ""
+                }
+            ],
+            "Facility": {
+                "ID": null,
+                "Name": "",
+                "Phone": "",
+                "Address": "",
+                "Fax": "",
+                "Hospital_Unit": ""
+            },
+            "Patient": {
+                "ID": [
+                    {
+                        "value": "1234000",
+                        "type": "urn:local:gtritest"
+                    },
+                    {
+                        "value": "888770000",
+                        "type": "SS"
+                    }
+                ],
+                "Name": {
+                    "given": "Example",
+                    "family": "Patient"
+                },
+                "Parents_Guardians": [],
+                "Street_Address": "1234 Olympic Street, Atlanta Ga 99999",
+                "Birth_Date": "19700712",
+                "Sex": "M",
+                "PatientClass": "",
+                "Race": {
+                    "Code": "",
+                    "System": "",
+                    "Display": ""
+                },
+                "Ethnicity": {
+                    "Code": "",
+                    "System": "",
+                    "Display": ""
+                },
+                "Preferred_Language": {
+                    "Code": "",
+                    "System": "",
+                    "Display": ""
+                },
+                "Occupation": "",
+                "Pregnant": false,
+                "Travel_History": [],
+                "Insurance_Type": {
+                    "Code": "",
+                    "System": "",
+                    "Display": ""
+                },
+                "Immunization_History": [],
+                "Visit_DateTime": "",
+                "Admission_DateTime": "",
+                "Date_Of_Onset": "",
+                "Symptoms": [],
+                "Lab_Order_Code": [
+                    {
+                        "Code": "164200",
+                        "System": "L",
+                        "Display": "C. trachomatis - PCA",
+                        "Date": "Fri Apr 29 17:01:00 EDT 2005",
+                        "Laboratory_Results": [
+                            {
+                                "Code": "164200",
+                                "System": "L",
+                                "Display": "C. trachomatis - PCA",
+                                "Date": "Tue May 03 15:32:00 EDT 2005",
+                                "Value": "Positive",
+                                "Unit": {
+                                    "Code": "",
+                                    "System": "",
+                                    "Display": ""
+                                }
+                            }
+                        ],
+                        "Facility": {
+                            "ID": null,
+                            "Name": "",
+                            "Phone": "",
+                            "Address": "",
+                            "Fax": "",
+                            "Hospital_Unit": ""
+                        },
+                        "Provider": {
+                            "ID": {
+                                "value": "P49430",
+                                "type": "ORDPROVIDER"
+                            },
+                            "Name": "D ATKINSON",
+                            "Phone": "",
+                            "Fax": "",
+                            "Email": "",
+                            "Facility": "",
+                            "Address": "",
+                            "Country": ""
+                        }
+                    },
+                    {
+                        "Code": "164205",
+                        "System": "L",
+                        "Display": "N gonorrhoeae Competition Rflx",
+                        "Date": "Fri Apr 29 17:01:00 EDT 2005",
+                        "Laboratory_Results": [
+                            {
+                                "Code": "164205",
+                                "System": "L",
+                                "Display": "N gonorrhoeae Competition Rflx",
+                                "Date": "Fri Apr 29 17:01:00 EDT 2005",
+                                "Value": "Negative",
+                                "Unit": {
+                                    "Code": "",
+                                    "System": "",
+                                    "Display": ""
+                                }
+                            },
+                            {
+                                "Code": "164212",
+                                "System": "L",
+                                "Display": "N gonorrhoeae DNA Probe w/Rflx",
+                                "Date": "Fri Apr 29 17:01:00 EDT 2005",
+                                "Value": "See Reflex",
+                                "Unit": {
+                                    "Code": "",
+                                    "System": "",
+                                    "Display": ""
+                                }
+                            }
+                        ],
+                        "Facility": {
+                            "ID": null,
+                            "Name": "",
+                            "Phone": "",
+                            "Address": "",
+                            "Fax": "",
+                            "Hospital_Unit": ""
+                        },
+                        "Provider": {
+                            "ID": {
+                                "value": "P49430",
+                                "type": "ORDPROVIDER"
+                            },
+                            "Name": "John Duke",
+                            "Phone": "",
+                            "Fax": "",
+                            "Email": "",
+                            "Facility": "",
+                            "Address": "",
+                            "Country": ""
+                        }
+                    }
+                ],
+                "Placer_Order_Code": "",
+                "Diagnosis": [],
+                "Medication Provided": [],
+                "Death_Date": "",
+                "Date_Discharged": "",
+                "Laboratory_Results": [],
+                "Trigger_Code": [],
+                "Lab_Tests_Performed": []
+            },
+            "Sending Application": "",
+            "Notes": []
+        }
+
+    :query string source: Source of ECR. Default is "elr". If the source is EHR, then use "ehr".
+    :statuscode 201: Created
+
+Triggering manual request
+*************************
+
+.. http:post:: /ecr-manager/trigger
+
+    Request to PACER-server is triggered by ELR in the PACER-client workflow (see :ref:`client overview`). 
+    However, in case that the manual triggering is needed, this API can be used to trigger an individaul case.
+
+    **Example Trigger Request**
+
+    .. sourcecode:: http
+
+        POST /ecr-manager/trigger?id=402 HTTP/1.1
+        Host: localhost:8085
+        Accept: */*
+        Content-Length: 0
+
+    **Example Trigger Response**
+
+    .. sourcecode:: http
+
+        HTTP/1.1 200 
+        Vary: Origin
+        Vary: Access-Control-Request-Method
+        Vary: Access-Control-Request-Headers
+        Content-Length: 0
+        Date: Wed, 12 Jul 2023 04:16:19 GMT
+
+    :query int id: ECR record ID. This is required query parameter.
+    :statuscode 200: Ok
+
+Retrieving Incoming ECR History
+*******************************
+
+.. http:get:: /ecr-manager/ECRhistory
+
+    This API retrieves list of incoming ECRs. ECRs coming from both ELR and EHR. Using this API,
+    history of incoming ECRs can be obtained. 
+
+    **Example ECR History Request**
+
+    .. sourcecode:: http
+
+        GET /ecr-manager/ECRhistory?id=4603&source=elr HTTP/1.1
+        Host: example.org:8085
+        Accept: */*
+
+    **Example ECR History Response**
+
+    .. sourcecode:: http
+
+        HTTP/1.1 200 
+        Vary: Origin
+        Vary: Access-Control-Request-Method
+        Vary: Access-Control-Request-Headers
+        Content-Type: application/json
+        Transfer-Encoding: chunked
+        Date: Tue, 07 May 2024 16:34:58 GMT
+
+        [
+            {
+                "ecrId": 4603,
+                "date": "2024-04-02 10:24:52.939",
+                "source": "elr",
+                "data": {
+                    "Id": "4603",
+                    "Status": "R",
+                    "StatusLog": null,
+                    "Provider": [
+                        {
+                            "ID": {
+                                "value": " GT|Reliable",
+                                "type": "appfac"
+                            },
+                            "Name": "",
+                            "Phone": "",
+                            "Fax": "",
+                            "Email": "",
+                            "Facility": "",
+                            "Address": "",
+                            "Country": ""
+                        },
+                        {
+                            "ID": {
+                                "value": "P49430",
+                                "type": "ORDPROVIDER"
+                            },
+                            "Name": "D ATKINSON",
+                            "Phone": "",
+                            "Fax": "",
+                            "Email": "",
+                            "Facility": "",
+                            "Address": "",
+                            "Country": ""
+                        },
+                        {
+                            "ID": {
+                                "value": "P49430",
+                                "type": "ORDPROVIDER"
+                            },
+                            "Name": "John Duke",
+                            "Phone": "",
+                            "Fax": "",
+                            "Email": "",
+                            "Facility": "",
+                            "Address": "",
+                            "Country": ""
+                        }
+                    ],
+                    "Facility": {
+                        "ID": null,
+                        "Name": "",
+                        "Phone": "",
+                        "Address": "",
+                        "Fax": "",
+                        "Hospital_Unit": ""
+                    },
+                    "Patient": {
+                        "ID": [
+                            {
+                                "value": "2001",
+                                "type": "urn:local:gtritest"
+                            },
+                            {
+                                "value": "500000001",
+                                "type": "SS"
+                            }
+                        ],
+                        "Name": {
+                            "given": "SOPHIE2001",
+                            "family": "STONE"
+                        },
+                        "Parents_Guardians": [],
+                        "Street_Address": "2222 Home Street, Ann Arbor MI 99999",
+                        "Birth_Date": "19750602",
+                        "Sex": "M",
+                        "PatientClass": "",
+                        "Race": {
+                            "Code": "2106-3",
+                            "System": "CDCREC",
+                            "Display": "White"
+                        },
+                        "Ethnicity": {
+                            "Code": "N",
+                            "System": "HL70189",
+                            "Display": "Not Hispanic or Latino"
+                        },
+                        "Preferred_Language": {
+                            "Code": "eng",
+                            "System": "ISO6392",
+                            "Display": "English"
+                        },
+                        "Occupation": "",
+                        "Pregnant": false,
+                        "Travel_History": [],
+                        "Insurance_Type": {
+                            "Code": "",
+                            "System": "",
+                            "Display": ""
+                        },
+                        "Immunization_History": [],
+                        "Visit_DateTime": "",
+                        "Admission_DateTime": "",
+                        "Date_Of_Onset": "",
+                        "Symptoms": [],
+                        "Lab_Order_Code": [
+                            {
+                                "Code": "164200",
+                                "System": "L",
+                                "Display": "C. trachomatis - PCA",
+                                "Date": "Fri Apr 29 17:01:00 EDT 2005",
+                                "Laboratory_Results": [
+                                    {
+                                        "Code": "164200",
+                                        "System": "L",
+                                        "Display": "C. trachomatis - PCA",
+                                        "Date": "Tue May 03 15:32:00 EDT 2005",
+                                        "Value": "Positive",
+                                        "Unit": {
+                                            "Code": "",
+                                            "System": "",
+                                            "Display": ""
+                                        }
+                                    }
+                                ],
+                                "Facility": {
+                                    "ID": null,
+                                    "Name": "",
+                                    "Phone": "",
+                                    "Address": "",
+                                    "Fax": "",
+                                    "Hospital_Unit": ""
+                                },
+                                "Provider": {
+                                    "ID": {
+                                        "value": "P49430",
+                                        "type": "ORDPROVIDER"
+                                    },
+                                    "Name": "D ATKINSON",
+                                    "Phone": "",
+                                    "Fax": "",
+                                    "Email": "",
+                                    "Facility": "",
+                                    "Address": "",
+                                    "Country": ""
+                                }
+                            },
+                            {
+                                "Code": "164205",
+                                "System": "L",
+                                "Display": "N gonorrhoeae Competition Rflx",
+                                "Date": "Fri Apr 29 17:01:00 EDT 2005",
+                                "Laboratory_Results": [
+                                    {
+                                        "Code": "164205",
+                                        "System": "L",
+                                        "Display": "N gonorrhoeae Competition Rflx",
+                                        "Date": "Fri Apr 29 17:01:00 EDT 2005",
+                                        "Value": "Negative",
+                                        "Unit": {
+                                            "Code": "",
+                                            "System": "",
+                                            "Display": ""
+                                        }
+                                    },
+                                    {
+                                        "Code": "164212",
+                                        "System": "L",
+                                        "Display": "N gonorrhoeae DNA Probe w/Rflx",
+                                        "Date": "Fri Apr 29 17:01:00 EDT 2005",
+                                        "Value": "See Reflex",
+                                        "Unit": {
+                                            "Code": "",
+                                            "System": "",
+                                            "Display": ""
+                                        }
+                                    }
+                                ],
+                                "Facility": {
+                                    "ID": null,
+                                    "Name": "",
+                                    "Phone": "",
+                                    "Address": "",
+                                    "Fax": "",
+                                    "Hospital_Unit": ""
+                                },
+                                "Provider": {
+                                    "ID": {
+                                        "value": "P49430",
+                                        "type": "ORDPROVIDER"
+                                    },
+                                    "Name": "John Duke",
+                                    "Phone": "",
+                                    "Fax": "",
+                                    "Email": "",
+                                    "Facility": "",
+                                    "Address": "",
+                                    "Country": ""
+                                }
+                            }
+                        ],
+                        "Placer_Order_Code": "",
+                        "Diagnosis": [],
+                        "Medication Provided": [],
+                        "Death_Date": "",
+                        "Date_Discharged": "",
+                        "Laboratory_Results": [],
+                        "Trigger_Code": [],
+                        "Lab_Tests_Performed": []
+                    },
+                    "Sending Application": "GT 1234 CLIA",
+                    "Notes": []
+                }
+            }
+        ]
+
+    :query int id: ECR record ID. Default = -1 (Id <= 0 indicates all recoreds)
+    :query string source: Source of ECR. "elr" or "ehr"
+    :query string date: date with inequality of "eq", "lt", "le", "gt", and "ge". Example "le 2022/12/01" means "<= 2022/12/01"
+    :statuscode 200: Ok
+
+Export ECRs to CSV File
+***********************
+.. http:get:: /ecr-manager/ExportCSV
+
+    This API exports all ECRs to CSV file. 
+
+    **Example ECR Export Request**
+
+    .. sourcecode:: http
+
+        GET /ecr-manager/exportCSV/ HTTP/1.1
+        Host: yellowisland01.icl.gtri.org:8085
+        Accept: */*
+
+    **Example ECR Export Response**
+
+    .. sourcecode:: http
+
+        HTTP/1.1 200 
+        Vary: Origin
+        Vary: Access-Control-Request-Method
+        Vary: Access-Control-Request-Headers
+        Content-Disposition: attachment; filename=ecr_20240507124728.csv
+        Content-Type: text/csv
+        Transfer-Encoding: chunked
+        Date: Tue, 07 May 2024 16:47:28 GMT
+
+        [ecr_20240507124728.csv is attached]
+
+    CSV file is attached and can be downloaded.
+
+Version Information
+*******************
+.. http:get:: /ecr-manager/version
+
+This API displays the version of ECR-MANAGER. 
+
+    **Example ECR-MANAGER Version Request**
+
+    .. sourcecode:: http
+
+        GET /ecr-manager/version HTTP/1.1
+        Host: yellowisland01.icl.gtri.org:8085
+        User-Agent: insomnia/9.1.0
+        Accept: */*
+
+    **Example ECR-MANAGER Version Response**
+
+    .. sourcecode:: http
+        
+        HTTP/1.1 200 
+        Vary: Origin
+        Vary: Access-Control-Request-Method
+        Vary: Access-Control-Request-Headers
+        Content-Type: text/plain;charset=UTF-8
+        Content-Length: 5
+        Date: Tue, 07 May 2024 21:50:58 GMT
+
+        1.5.3
 
 .. _client elr receiver:
 
-============
+************
 ELR Reciever
-============
+************
 <ELR_Receiver Overview here>
+
 
 .. _client index service:
 
-===============
+***************
 PACER Index API
-===============
-
+***************
+========
 Overview
-********
+========
 <PACER Index API Overview here>
 
+=================
 API Documentation
-*****************
+=================
 <PACER Index API API Documentation here>
 
 .. _client ui:
 
+********
 PACER UI
-========
+********
 
-PACER UI: Overview
-------------------
+========
+Overview
+========
 <PACER UI: Overview>
 
-PACER UI: Walkthrough
----------------------
+Walkthrough
+***********
 <PACER UI User Walkthrough with pictures here>
