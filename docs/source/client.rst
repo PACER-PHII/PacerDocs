@@ -7,17 +7,29 @@ PACER Client
 ***************
 Client Workflow
 ***************
-PACER workflow starts as the **ELR receiver** receives a positive STD electronic lab result (ELR) message in HL7 v2.5.1. Once 
-the ELR message is received, an initial ECR is created from the ELR message. The ECR is then sent to **ECR manager** to be saved 
-as a case in the database.
-
-**ECR manager** constructs a PACER request for the ECR case and submit to the the PACER-server to query EHR FHIR server for the 
-patient's clincal data. The query criteria the STD condition are defined with clincal query langurage (CQL). Figure 1 depicts the 
-overall architecture of PACER.
+There are two components in a PACER platform, PACER-server and PACER-clent. This section covers PACER-client (green section in Figure 1). 
+PACER-client is deployed in the public health department network and controlled by health department IT. 
 
 .. image:: client_fig/PACER_Architecture.png
     :width: 700
     :alt: Overall PACER Architecture
+
+Figure 1: Overall PACER Architecture
+
+Overall PACER workflow is shown in Figure 2. PACER-client starts at step #7 in Figure 2. When the PACER-client 
+receives an STD electronic lab result (ELR) message, ECR operation is triggered, and initial ECR is created. 
+Then, a PACER request is constructed and inserted into the job queue. Current version of PACER-client marks the 
+job completed when an ECR from PACER-server is received. Otherwise, the job will be marked as failure. 
+
+The ECR response from PACER-server will be merged into the initial ECR and augment the ECR content.
+The PACER requests are stored in the job queue and never removed. Therefore, the requests can be restarted by changing 
+the request status in the queue. This can be done either by manually triggering the query or next ELR for the same case.
+
+.. image:: client_fig/PACERworkflow.png
+    :width: 700
+    :alt: PACER workflow
+
+Figure 2: PACER Workflow
 
 .. _client installation:
 
