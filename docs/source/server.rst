@@ -129,13 +129,11 @@ Job Management System: API Documentation
 ----------------------------------------
 .. http:POST:: /JobManagementSystem/List
 
-    This API is the main 
-
     **Example ECR Request**
 
     .. sourcecode:: http
 
-        POST /JobManagementSystem/List/1.1
+        POST /JobManagementSystem/List/ HTTP/1.1
         Host: example.org
         Accept: */*
         Content-Type: application/json
@@ -369,7 +367,7 @@ Job Management System: API Documentation
         ]
 
     :<json string name: Assigned name of the job if client wishes to track job status asynchronously.
-    Optional and will be autogenerate if not provided.
+        Optional and will be autogenerate if not provided.
     :<json string jobType: Enumerated value describing the type of job and return to be completed.
     Currently, only one jobType is accepted: 'ECR'
     :<json string listType: Enumerated value describing the type of list reoccurence to be used.
