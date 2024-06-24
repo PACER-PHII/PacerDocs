@@ -718,7 +718,6 @@ CQL Execution Service: API Documentation
         Host: example.org
         Accept: */*
         Content-Type: application/json
-        Epic-Client-id; $\<Stored Epic Client Id if OAuth workflow is enabled\>
 
         {
             "code": "Your CQL code",
