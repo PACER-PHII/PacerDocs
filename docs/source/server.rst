@@ -400,11 +400,10 @@ and mapping CQL results to ECR fields.
 
 Results Manager: API Documentation
 ----------------------------------
-<Results Manager API Review here>
 
 .. http:POST:: /ResultsManager/Case
 
-    **Example ECR Request**
+    **Example Results Manager Request**
 
     .. sourcecode:: http
 
@@ -426,7 +425,7 @@ Results Manager: API Documentation
         Date: Tue, 07 May 2024 14:47:26 GMT
 
         {
-            "Id": "4602",
+            "CQLs": "4602",
             "Status": "A",
             "StatusLog": null,
             "Provider": [
@@ -656,11 +655,44 @@ CQL Storage
 
 CQL Storage: Overview
 ---------------------
-<CQL Storage Information here>
+CQLStorage service is responsible for hosting CQL files for retrieval during the PACER workflow. It is a simple storage service
+using a simple blob schema within the PACER server database for holding files. Files are accessed by their title.
 
 CQL Storage: API Documentation
 ------------------------------
-<CQL Storage API Review here>
+.. http:GET:: /CQLStorage/CQL
+
+    **Example CQL Storage Request**
+
+    .. sourcecode:: http
+
+        GET /CQLStorage/CQL/ HTTP/1.1
+        Host: example.org
+        Accept: */*
+        Content-Type: application/json
+
+    **Example Response**
+
+    .. sourcecode:: http
+
+        HTTP/1.1 200 
+        Vary: Origin
+        Vary: Access-Control-Request-Method
+        Vary: Access-Control-Request-Headers
+        Content-Type: application/json
+        Transfer-Encoding: chunked
+        Date: Tue, 07 May 2024 14:47:26 GMT
+
+        {
+            "CQLs": [
+                "name": "ECR",
+                "body": "library ECR version '1.1'\r\nusing FHIR version '3.0.0'\r\ninclude FHIRHelpers version '3.0.0' called FHIRHelpers\r\ncodesystem \"ICD9PROC\": 'http://hl7.org/fhir/sid/icd-9-proc'\r\ncodesystem \"LOINC\": 'http://loinc.org'\r\ncodesystem \"CPT\": 'http://www.ama-assn.org/go/cpt'\r\ncodesystem \"icd10cm\": 'http://hl7.org/fhir/sid/icd-10-cm'\r\ncodesystem \"sct\": 'http://snomed.info/sct'\r\ncodesystem \"rxnorm\": 'http://www.nlm.nih.gov/research/umls/rxnorm'\r\n\r\ndefine \"Chlamydia_Codes\": Concept {Code 'A56' from icd10cm, Code 'A56.0' from icd10cm, Code 'A56.00' from icd10cm, Code 'A56.01' from icd10cm, Code 'A56.02' from icd10cm, $\<Encoded CQL Script Continues\>"
+            ]
+        }
+
+    :<query string name: identifiable name of the CQL body. Shoudlmatch the library name within the CQL content itself.
+    :resheader Content-Type: application/json
+    :statuscode 200: no error
 
 .. _server CQL Execution Service:
 
@@ -669,34 +701,81 @@ CQL Execution Service
 
 CQL Execution Service: Overview
 -------------------------------
-<CQL Execution Service here>
+The CQL Execution Service is a derived cql-execution-service as developed by the DBCG group.
+The service is responsible for actually executing relevant CQL against a patient, and creating
+a set of CQL results which will be parsed by the results manager for the resultant ECR
 
 CQL Execution Service: API Documentation
 ----------------------------------------
-<CQL Execution Service API Review here>
 
-.. _server FHIR Filter:
+.. http:POST:: /cql-execution-service/cql/evaluate
 
-FHIR Filter
-===========
+    **Example CQL Storage Request**
 
-FHIR Filter: Overview
----------------------
-<FHIR Filter here>
+    .. sourcecode:: http
 
-FHIR Filter: API Documentation
-------------------------------
-<FHIR Filter API Review here>
+        GET /cql-execution-service/cql/evaluate HTTP/1.1
+        Host: example.org
+        Accept: */*
+        Content-Type: application/json
+        Epic-Client-id; $\<Stored Epic Client Id if OAuth workflow is enabled>
 
-.. _server Translate Concept Service:
+        {
+            "code": "Your CQL code",
+            "terminologyServiceUri": "Terminology Service Endpoint",
+            "terminologyUser": "Username for authentication",
+            "terminologyPass": "Password for authentication",
+            "dataServiceUri": "Fhir Data Provider Endpoint",
+            "dataUser": "Username for authentication",
+            "dataPass": "Password for authentication",
+            "patientId": "The patient you want to run the library against"
+            "parameters": [
+                {
+                    "name": "Name of the parameter as specified in the CQL",
+                    "type": "Name of the type (currently only singleton CQL types are supported)",
+                    "value": String (String, DateTime, and Time) | Integer | Decimal | Object (Code, Concept, Quantity, Interval)
+                }
+            ]
+        }
 
-Translate Concept Service
-=========================
+    **Example Response**
 
-Translate Concept Service: Overview
------------------------------------
-<Translate Concept Service here>
+    .. sourcecode:: http
 
-Translate Concept Service: API Documentation
---------------------------------------------
-<Translate Concept Service API Review here>
+        HTTP/1.1 200 
+        Vary: Origin
+        Vary: Access-Control-Request-Method
+        Vary: Access-Control-Request-Headers
+        Content-Type: application/json
+        Transfer-Encoding: chunked
+        Date: Tue, 07 May 2024 14:47:26 GMT
+
+        [
+            {
+                "name": "Pt (Patient)",
+                "location": "[1:1]",
+                "resultType": "FHIR.Patient",
+                "error": "",
+                "result": "$\<FHIR Patient json here\>"
+            },
+            {
+                "name": "Chalmydia Diagnosis",
+                "location": "[15:1]",
+                "resultType": "FHIR.Condition",
+                "error": "",
+                "result": "$\<FHIR Condition json here\>"
+            }
+        ]
+
+    :<json string code: UTF-8 Encoded string body of CQL script definition
+    :<json string terminologyServiceUri: If a translations service for converting valuesets is provided, CQL-execution-service will use
+        this terminology service. Refer to https://build.fhir.org/terminology-service.html for specification on terminology interfaces
+        using fhir
+    :<json string terminologyUser: A basic username for authentication to the terminologyService, if applicable
+    :<json string terminologyPass: A basic password for authentication to the terminologyService, if applicable
+    :<json string dataServiceUri: The FHIR server the CQL script will be executed against
+    :<json string dataUser: A basic username for authentication to the dataService, if applicable
+    :<json string dataPass: A basic password for authentication to the dataService, if applicable
+    :<json string patientId: A FHIR id which identifies the FHIR patient to be used in the CQL script.
+    :resheader Content-Type: application/json
+    :statuscode 200: no error
