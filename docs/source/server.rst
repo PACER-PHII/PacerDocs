@@ -369,18 +369,19 @@ Job Management System: API Documentation
     :<json string name: Assigned name of the job if client wishes to track job status asynchronously.
         Optional and will be autogenerate if not provided.
     :<json string jobType: Enumerated value describing the type of job and return to be completed.
-    Currently, only one jobType is accepted: 'ECR'
+        Currently, only one jobType is accepted: 'ECR'
     :<json string listType: Enumerated value describing the type of list reoccurence to be used.
-    Currently supports 'SINGLE_USE' and 'PERIODIC'. SINGLE_USE for synchronous requests and PERIODIC
-    for asynchronous and repeated work. 'SINGLE_USE' is default and recommended for most applications.
+        Currently supports 'SINGLE_USE' and 'PERIODIC'. SINGLE_USE for synchronous requests and PERIODIC
+        for asynchronous and repeated work. 'SINGLE_USE' is default and recommended for most applications.
     :<jsonarr listElements: An array of patient elements which constitute the patients to be used in this job.
     :<json string listElements[x].referenceId: A pipe delimited (\|) set of system\|value identifiers which contains
-    the patient identifier. This is an identifier which can be used directly upon the FHIR server to help identify
-    the patient.
-    :<json string listElements[x].name: Common name provided for the patient; helps to supplement the patient identification
-    procedure
-    :<json string listElements[x].labOrderDate: A common string structured Date used to support the CQL process by determining
-    relevant conditions, symptoms, and observations based upon the initial labOrderDtae provided by the Health Department.
+        the patient identifier. This is an identifier which can be used directly upon the FHIR server to help identify
+        the patient.
+    :<json string listElements[x].name: Common name provided for the patient; helps to supplement the patient
+        identification procedure.
+    :<json string listElements[x].labOrderDate: A common string structured Date used to support the CQL process by
+        determining relevant conditions, symptoms, and observations based upon the initial labOrderDtae provided
+        by the Health Department.
     :resheader Content-Type: application/json
     :statuscode 200: no error
 
