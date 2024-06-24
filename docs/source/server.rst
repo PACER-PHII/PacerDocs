@@ -123,13 +123,14 @@ Job Management System: Overview
 -------------------------------
 The JobManagementSystem component is the entry-point for the PACER-server. Responsible for negotiating the 
 workflow for PACER-server, JMS manages the request to results amnager as well as an additional workflow
-considerations.
+considerations. While the resultsmanager does most of the orchestration per patient, The Job Manager
+System oversees the cohort of patients if a list of patients is submitted.
 
 Job Management System: API Documentation
 ----------------------------------------
 .. http:POST:: /JobManagementSystem/List
 
-    **Example ECR Request**
+    **Example JMS Request**
 
     .. sourcecode:: http
 
@@ -138,7 +139,7 @@ Job Management System: API Documentation
         Accept: */*
         Content-Type: application/json
 
-    **Example Response**
+    **Example JMS Response**
 
     .. sourcecode:: http
 
@@ -393,13 +394,262 @@ Results Manager
 
 Results Manager: Overview
 -------------------------
-<Results Manager Information here>
+The ResultsManager oversees orchestration of the other components to complete an final ECR for the patient.
+It manages interfacing to the CQL service, access of the main ECR.cql body, concept translations to local systems if provided,
+and mapping CQL results to ECR fields.
 
 Results Manager: API Documentation
 ----------------------------------
 <Results Manager API Review here>
 
-.. _server CQL Storage:
+.. http:POST:: /ResultsManager/Case
+
+    **Example ECR Request**
+
+    .. sourcecode:: http
+
+        POST /JobManagementSystem/List/ HTTP/1.1
+        Host: example.org
+        Accept: */*
+        Content-Type: application/json
+
+    **Example Response**
+
+    .. sourcecode:: http
+
+        HTTP/1.1 200 
+        Vary: Origin
+        Vary: Access-Control-Request-Method
+        Vary: Access-Control-Request-Headers
+        Content-Type: application/json
+        Transfer-Encoding: chunked
+        Date: Tue, 07 May 2024 14:47:26 GMT
+
+        {
+            "Id": "4602",
+            "Status": "A",
+            "StatusLog": null,
+            "Provider": [
+                {
+                    "ID": {
+                        "value": " GT|Reliable",
+                        "type": "appfac"
+                    },
+                    "Name": "",
+                    "Phone": "",
+                    "Fax": "",
+                    "Email": "",
+                    "Facility": "",
+                    "Address": "",
+                    "Country": ""
+                },
+                {
+                    "ID": {
+                        "value": "P49430",
+                        "type": "ORDPROVIDER"
+                    },
+                    "Name": "D ATKINSON",
+                    "Phone": "",
+                    "Fax": "",
+                    "Email": "",
+                    "Facility": "",
+                    "Address": "",
+                    "Country": ""
+                },
+                {
+                    "ID": {
+                        "value": "P49430",
+                        "type": "ORDPROVIDER"
+                    },
+                    "Name": "John Duke",
+                    "Phone": "",
+                    "Fax": "",
+                    "Email": "",
+                    "Facility": "",
+                    "Address": "",
+                    "Country": ""
+                }
+            ],
+            "Facility": {
+                "ID": null,
+                "Name": "",
+                "Phone": "",
+                "Address": "",
+                "Fax": "",
+                "Hospital_Unit": ""
+            },
+            "Patient": {
+                "ID": [
+                    {
+                        "value": "2000",
+                        "type": "urn:local:gtritest"
+                    },
+                    {
+                        "value": "500000000",
+                        "type": "SS"
+                    },
+                    {
+                        "value": "82713",
+                        "type": "urn:local:gtritest"
+                    }
+                ],
+                "Name": {
+                    "given": "SOPHIE82713",
+                    "family": "STONE"
+                },
+                "Parents_Guardians": [],
+                "Street_Address": "2222 Home Street, Ann Arbor MI 99999",
+                "Birth_Date": "19750602",
+                "Sex": "M",
+                "PatientClass": "",
+                "Race": {
+                    "Code": "",
+                    "System": "",
+                    "Display": ""
+                },
+                "Ethnicity": {
+                    "Code": "",
+                    "System": "",
+                    "Display": ""
+                },
+                "Preferred_Language": {
+                    "Code": "",
+                    "System": "",
+                    "Display": ""
+                },
+                "Occupation": "",
+                "Pregnant": false,
+                "Travel_History": [],
+                "Insurance_Type": {
+                    "Code": "",
+                    "System": "",
+                    "Display": ""
+                },
+                "Immunization_History": [],
+                "Visit_DateTime": "",
+                "Admission_DateTime": "",
+                "Date_Of_Onset": "",
+                "Symptoms": [],
+                "Lab_Order_Code": [
+                    {
+                        "Code": "164200",
+                        "System": "L",
+                        "Display": "C. trachomatis - PCA",
+                        "Date": "Fri Apr 29 17:01:00 EDT 2005",
+                        "Laboratory_Results": [
+                            {
+                                "Code": "164200",
+                                "System": "L",
+                                "Display": "C. trachomatis - PCA",
+                                "Date": "Tue May 03 15:32:00 EDT 2005",
+                                "Value": "Positive",
+                                "Unit": {
+                                    "Code": "",
+                                    "System": "",
+                                    "Display": ""
+                                }
+                            }
+                        ],
+                        "Facility": {
+                            "ID": null,
+                            "Name": "",
+                            "Phone": "",
+                            "Address": "",
+                            "Fax": "",
+                            "Hospital_Unit": ""
+                        },
+                        "Provider": {
+                            "ID": {
+                                "value": "P49430",
+                                "type": "ORDPROVIDER"
+                            },
+                            "Name": "D ATKINSON",
+                            "Phone": "",
+                            "Fax": "",
+                            "Email": "",
+                            "Facility": "",
+                            "Address": "",
+                            "Country": ""
+                        }
+                    },
+                    {
+                        "Code": "164205",
+                        "System": "L",
+                        "Display": "N gonorrhoeae Competition Rflx",
+                        "Date": "Fri Apr 29 17:01:00 EDT 2005",
+                        "Laboratory_Results": [
+                            {
+                                "Code": "164205",
+                                "System": "L",
+                                "Display": "N gonorrhoeae Competition Rflx",
+                                "Date": "Fri Apr 29 17:01:00 EDT 2005",
+                                "Value": "Negative",
+                                "Unit": {
+                                    "Code": "",
+                                    "System": "",
+                                    "Display": ""
+                                }
+                            },
+                            {
+                                "Code": "164212",
+                                "System": "L",
+                                "Display": "N gonorrhoeae DNA Probe w/Rflx",
+                                "Date": "Fri Apr 29 17:01:00 EDT 2005",
+                                "Value": "See Reflex",
+                                "Unit": {
+                                    "Code": "",
+                                    "System": "",
+                                    "Display": ""
+                                }
+                            }
+                        ],
+                        "Facility": {
+                            "ID": null,
+                            "Name": "",
+                            "Phone": "",
+                            "Address": "",
+                            "Fax": "",
+                            "Hospital_Unit": ""
+                        },
+                        "Provider": {
+                            "ID": {
+                                "value": "P49430",
+                                "type": "ORDPROVIDER"
+                            },
+                            "Name": "John Duke",
+                            "Phone": "",
+                            "Fax": "",
+                            "Email": "",
+                            "Facility": "",
+                            "Address": "",
+                            "Country": ""
+                        }
+                    }
+                ],
+                "Placer_Order_Code": "",
+                "Diagnosis": [],
+                "Medication Provided": [],
+                "Death_Date": "",
+                "Date_Discharged": "",
+                "Laboratory_Results": [],
+                "Trigger_Code": [],
+                "Lab_Tests_Performed": []
+            },
+            "Sending Application": "",
+            "Notes": []
+        }
+
+    :<query string firstName: first name of patient. Used as supporting information for identifying the patient.
+    :<query string lastName: last name of patient. Used as supporting information for identifying the patient.
+    :<query string identifier: A pipe delimited (\|) set of system\|value identifiers which contains
+        the patient identifier. This is an identifier which can be used directly upon the FHIR server to help identify
+        the patient.
+    :<ecrId: Optional parameter for setting an id for the ECR record itself. No id will be returned if not provided.
+    :<json string listElements[x].labOrderDate: A common string structured Date used to support the CQL process by
+        determining relevant conditions, symptoms, and observations based upon the initial labOrderDtae provided
+        by the Health Department.
+    :resheader Content-Type: application/json
+    :statuscode 200: no error
 
 CQL Storage
 ============
