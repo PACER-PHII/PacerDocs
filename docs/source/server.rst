@@ -721,27 +721,28 @@ CQL Execution Service: API Documentation
 
     .. sourcecode:: json
 
-    {
-        "code": "Your CQL code",
-        "terminologyServiceUri": "Terminology Service Endpoint",
-        "terminologyUser": "Username for authentication",
-        "terminologyPass": "Password for authentication",
-        "dataServiceUri": "Fhir Data Provider Endpoint",
-        "dataUser": "Username for authentication",
-        "dataPass": "Password for authentication",
-        "patientId": "The patient you want to run the library against",
-        "parameters": [
+        {
+            "code": "Your CQL code",
+            "terminologyServiceUri": "Terminology Service Endpoint",
+            "terminologyUser": "Username for authentication",
+            "terminologyPass": "Password for authentication",
+            "dataServiceUri": "Fhir Data Provider Endpoint",
+            "dataUser": "Username for authentication",
+            "dataPass": "Password for authentication",
+            "patientId": "The patient you want to run the library against",
+            "parameters": [
 
-            {
+                {
+                
+                    "name": "Name of the parameter as specified in the CQL",
+                    "type": "Name of the type (currently only singleton CQL types are supported)",
+                    "value": "String (String, DateTime, and Time) | Integer | Decimal | Object (Code, Concept, Quantity, Interval)"
+
+                }
+
+            ]
             
-                "name": "Name of the parameter as specified in the CQL",
-                "type": "Name of the type (currently only singleton CQL types are supported)",
-                "value": "String (String, DateTime, and Time) | Integer | Decimal | Object (Code, Concept, Quantity, Interval)"
-
-            }
-
-        ]
-    }
+        }
 
     **Example Response**
 
