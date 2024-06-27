@@ -720,6 +720,7 @@ CQL Execution Service: API Documentation
         Content-Type: application/json
 
     .. sourcecode:: json
+
     {
         "code": "Your CQL code",
         "terminologyServiceUri": "Terminology Service Endpoint",
@@ -733,7 +734,7 @@ CQL Execution Service: API Documentation
             {
                 "name": "Name of the parameter as specified in the CQL",
                 "type": "Name of the type (currently only singleton CQL types are supported)",
-                "value": String (String, DateTime, and Time) | Integer | Decimal | Object (Code, Concept, Quantity, Interval)
+                "value": "String (String, DateTime, and Time) | Integer | Decimal | Object (Code, Concept, Quantity, Interval)"
             }
         ]
     }
