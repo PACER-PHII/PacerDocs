@@ -690,7 +690,7 @@ CQL Storage: API Documentation
             ]
         }
 
-    :<query string name: identifiable name of the CQL body. Shoudlmatch the library name within the CQL content itself.
+    :query name: identifiable name of the CQL body. Shoudlmatch the library name within the CQL content itself.
     :resheader Content-Type: application/json
     :statuscode 200: no error
 
@@ -762,14 +762,14 @@ CQL Execution Service: API Documentation
                 "location": "[1:1]",
                 "resultType": "FHIR.Patient",
                 "error": "",
-                "result": "$\<FHIR Patient json here\>"
+                "result": "$<FHIR Patient json here>"
             },
             {
                 "name": "Chalmydia Diagnosis",
                 "location": "[15:1]",
                 "resultType": "FHIR.Condition",
                 "error": "",
-                "result": "$\<FHIR Condition json here\>"
+                "result": "$\FHIR Condition json here>"
             }
         ]
 
