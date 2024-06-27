@@ -638,13 +638,13 @@ Results Manager: API Documentation
             "Notes": []
         }
 
-    :<query string firstName: first name of patient. Used as supporting information for identifying the patient.
-    :<query string lastName: last name of patient. Used as supporting information for identifying the patient.
-    :<query string identifier: A pipe delimited (\|) set of system\|value identifiers which contains
+    :query firstName: first name of patient. Used as supporting information for identifying the patient.
+    :query lastName: last name of patient. Used as supporting information for identifying the patient.
+    :query identifier: A pipe delimited (\|) set of system\|value identifiers which contains
         the patient identifier. This is an identifier which can be used directly upon the FHIR server to help identify
         the patient.
-    :<ecrId: Optional parameter for setting an id for the ECR record itself. No id will be returned if not provided.
-    :<json string listElements[x].labOrderDate: A common string structured Date used to support the CQL process by
+    :query ecrId: Optional parameter for setting an id for the ECR record itself. No id will be returned if not provided.
+    :query labOrderDate: A common string structured Date used to support the CQL process by
         determining relevant conditions, symptoms, and observations based upon the initial labOrderDtae provided
         by the Health Department.
     :resheader Content-Type: application/json
@@ -741,7 +741,7 @@ CQL Execution Service: API Documentation
                 }
 
             ]
-            
+
         }
 
     **Example Response**
