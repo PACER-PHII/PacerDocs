@@ -1452,8 +1452,8 @@ API Documentation
 
 PACER-Index-API service has two operations. One is management operation, and the other one is search operation. 
 
-Manament Operation
-******************
+Management Operation
+********************
 .. http:get:: /pacer-index-api/1.0.0/manage/{id}
 
     This API retrieves entire index entries. 
@@ -1761,8 +1761,80 @@ PACER UI
 ========
 Overview
 ========
-<PACER UI: Overview>
+PACER UI is developed to assist users to view case details, export case reports, and re-trigger the queries. 
+PACER UI is a thin web application running over ECR Manager APIs (see :ref:`client ECR Manager API`) 
 
-Walkthrough
-***********
-<PACER UI User Walkthrough with pictures here>
+Main Dashboard
+**************
+The figure 3 below shows the main dashboard of PACER UI. The main dashboard shows the list of current cases 
+that are registered in the :ref:`client ECR Manager`. 
+
+.. image:: ui_fig/pacer-ui-client.png
+    :width: 700
+    :alt: PACER UI Main Dashboard
+
+Figure 3: PACER UI Main Dashboard
+
+The main dashboard shows minimum information to identify the cases, current status, and some action buttons. The 
+status will be in *running* if ECR manager is querying PACER server for clinical data. ECR manager will 
+stop querying when the query was successful (accomplished status) or an error occurred. The query can be manully 
+triggerred at any time by clicking the query button. 
+
+Record Details
+**************
+To see details of cases, "Details" button can be clicked. Users will be lead to the record details page. This page 
+shows all the merged electronic case reports received up to the point where users see the page. This includes both 
+ECRs from ELR messages and EHR data query. The following figure 4 shows the record details page.
+
+.. image:: ui_fig/pacer-ui-case-detail.png
+    :width: 700
+    :alt: Record Detail Page
+
+Figure 4: Record Details
+
+As previously mentioned, all ECRs are aggregated. Later ECR precedes the earlier data. Thus, some data elements 
+such as names and addresses may be changed by data from EHR queries. 
+
+.. note::
+    To go back to the main dashboard, press "**PACER client**" on the top banner. Back brwser button or backspace on 
+    the keyboard does not work and will give an error. If, by any chance, the back button is pressed, type the URL 
+    again in the browser to go back to the main dashboard. 
+
+History / View History
+***********************
+History page shows all incoming ECRs. No ECRs will be discarded even for duplicated records. They are persisted 
+in the PACER client database. By clicking on History or View History button on any pages, all incoming data from ELR and 
+EHR can be explored. Figure 5 shows the history detail page. 
+
+.. image:: ui_fig/pacer-ui-history.png
+    :width: 700
+    :alt: History Page
+
+Figure 4: Record History
+
+The record history is another dashboard type UI to help users to review all incmong ECDRs. There are check boxes that
+users can filter the list by either ELR source or EHR source. Users can see details of the entry by expanding the
+line as shown in Figure 5.
+
+.. image:: ui_fig/pacer-ui-history-ehr.png
+    :width: 700
+    :alt: Detail for history data from EHR
+
+.. image:: ui_fig/pacer-ui-history-elr.png
+    :width: 700
+    :alt: etail for history data from ELR
+
+Figure 5: Seeing Details by Expanding the Entry Line in the History Page
+
+Exporting to CSV File
+*********************
+In the main dashboard (see Figure 3), there is a batton labeled as "**Export to CSV**". This button allows users to
+download entire ECR list shown on the dashboard to a CSV file. The downloaded file will be named with a current 
+timestamp. CSV file contains all the (aggregated) ECRs collpased in a flat column based format. Some complex
+data elements such as diagnosis, medications, lab results, etc. are combined into a single cell with a delimiter.
+
+.. note::
+    Because of dynamic nature of data, we have multiple entries of data (e.g. providers). In this case, the column names
+    are added by _{index}. For this reason, based on the cases, total number of columns varies each time the list is
+    exported.
+
