@@ -1764,8 +1764,9 @@ Overview
 PACER UI is developed to assist users to view case details, export case reports, and re-trigger the queries. 
 PACER UI is a thin web application running over ECR Manager APIs (see :ref:`client ECR Manager API`) 
 
+==============
 Main Dashboard
-**************
+==============
 The figure 3 below shows the main dashboard of PACER UI. The main dashboard shows the list of current cases 
 that are registered in the :ref:`client ECR Manager`. 
 
@@ -1780,8 +1781,9 @@ status will be in *running* if ECR manager is querying PACER server for clinical
 stop querying when the query was successful (accomplished status) or an error occurred. The query can be manully 
 triggerred at any time by clicking the query button. 
 
+==============
 Record Details
-**************
+==============
 To see details of cases, "Details" button can be clicked. Users will be lead to the record details page. This page 
 shows all the merged electronic case reports received up to the point where users see the page. This includes both 
 ECRs from ELR messages and EHR data query. The following figure 4 shows the record details page.
@@ -1800,8 +1802,9 @@ such as names and addresses may be changed by data from EHR queries.
     the keyboard does not work and will give an error. If, by any chance, the back button is pressed, type the URL 
     again in the browser to go back to the main dashboard. 
 
+======================
 History / View History
-***********************
+======================
 History page shows all incoming ECRs. No ECRs will be discarded even for duplicated records. They are persisted 
 in the PACER client database. By clicking on History or View History button on any pages, all incoming data from ELR and 
 EHR can be explored. Figure 5 shows the history detail page. 
@@ -1826,8 +1829,9 @@ line as shown in Figure 5.
 
 Figure 5: Seeing Details by Expanding the Entry Line in the History Page
 
+=====================
 Exporting to CSV File
-*********************
+=====================
 In the main dashboard (see Figure 3), there is a batton labeled as "**Export to CSV**". This button allows users to
 download entire ECR list shown on the dashboard to a CSV file. The downloaded file will be named with a current 
 timestamp. CSV file contains all the (aggregated) ECRs collpased in a flat column based format. Some complex
